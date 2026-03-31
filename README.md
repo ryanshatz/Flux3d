@@ -1,9 +1,5 @@
 <div align="center">
 
-<img src="docs/screenshots/banner.png" alt="Flux3D Banner" width="100%" />
-
-<br />
-
 # ◆ FLUX3D
 
 ### An open-source, immersive 3D visualizer for Five9 IVR call flows
