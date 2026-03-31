@@ -1,0 +1,20 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+*.swp
+*.swo
+
+# Customer IVR scripts (sensitive data — only sample INBOUND OPEN is committed)
+Afterhours*.five9ivr
+Completion*.five9ivr
+QCB*.five9ivr
+THD*.five9ivr
