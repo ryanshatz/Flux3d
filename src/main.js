@@ -173,6 +173,16 @@ class Flux3D {
       }
     });
 
+    // Toggle Tour
+    const btnTour = document.getElementById('btn-toggle-tour');
+    btnTour.addEventListener('click', () => {
+      if (this.sceneManager._tour?.active) {
+        this.sceneManager.stopTour();
+      } else {
+        this.sceneManager.startTour();
+      }
+    });
+
     // Reset Camera
     const btnReset = document.getElementById('btn-reset-camera');
     btnReset.addEventListener('click', () => {

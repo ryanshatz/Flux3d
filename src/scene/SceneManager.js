@@ -189,6 +189,7 @@ export class SceneManager {
   }
 
   toggleControlMode() {
+    if (this._tour.active) this.stopTour(); // exit tour first
     if (this.controlMode === 'thirdPerson') {
       // Switch to orbit/freecam
       this.controlMode = 'orbit';
@@ -199,6 +200,7 @@ export class SceneManager {
         this.avatar.disable();
         this.avatar.avatarGroup.visible = true;
       }
+      this._updateModeBadge('orbit');
     } else {
       // Switch back to 3rd person
       this.controlMode = 'thirdPerson';
@@ -207,6 +209,7 @@ export class SceneManager {
         this.avatar.enable();
         this.avatar.avatarGroup.visible = true;
       }
+      this._updateModeBadge('thirdPerson');
     }
   }
 
@@ -869,10 +872,21 @@ export class SceneManager {
     this._tour.timer = 0;
     this._tour._transitioning = true;
 
+    // Update HUD elements
+    this._updateModeBadge('tour');
+    this._updateTourCard(path[0], 0, path.length);
+    const tourCard = document.getElementById('tour-card');
+    if (tourCard) tourCard.classList.remove('hidden');
+    const tourBtn = document.getElementById('btn-toggle-tour');
+    if (tourBtn) tourBtn.classList.add('active');
+
     // Fly to first module
     const firstObj = this.modules3D[path[0]];
     if (firstObj) {
       this._flyToModule(firstObj.position);
+      // Trigger inspector for first module
+      this._highlightModule(path[0]);
+      this._tracePath(path[0]);
     }
   }
 
@@ -880,6 +894,12 @@ export class SceneManager {
     this._tour.active = false;
     this._tour.path = [];
     this._tour.index = 0;
+
+    // Hide tour card
+    const tourCard = document.getElementById('tour-card');
+    if (tourCard) tourCard.classList.add('hidden');
+    const tourBtn = document.getElementById('btn-toggle-tour');
+    if (tourBtn) tourBtn.classList.remove('active');
 
     // Restore previous mode
     if (this._preTourMode === 'thirdPerson') {
@@ -889,6 +909,9 @@ export class SceneManager {
         this.avatar.enable();
       }
       this.controls.enabled = false;
+      this._updateModeBadge('thirdPerson');
+    } else {
+      this._updateModeBadge('orbit');
     }
     this._preTourMode = null;
   }
@@ -913,6 +936,7 @@ export class SceneManager {
       const moduleId = this._tour.path[this._tour.index];
       this._highlightModule(moduleId);
       this._tracePath(moduleId);
+      this._updateTourCard(moduleId, this._tour.index, this._tour.path.length);
 
       // Fly to next module
       const obj = this.modules3D[moduleId];
@@ -938,6 +962,56 @@ export class SceneManager {
         this.controls.target.lerp(obj.position, Math.min(3 * delta, 1));
         this.controls.update();
       }
+    }
+  }
+
+  _updateModeBadge(mode) {
+    const badge = document.getElementById('mode-badge');
+    if (!badge) return;
+    const labels = {
+      thirdPerson: '🎮 3RD PERSON',
+      orbit: '🎥 ORBIT',
+      tour: '🎬 TOUR'
+    };
+    badge.textContent = labels[mode] || mode;
+    badge.classList.toggle('tour-active', mode === 'tour');
+  }
+
+  _updateTourCard(moduleId, index, total) {
+    const nameEl = document.getElementById('tour-module-name');
+    const typeEl = document.getElementById('tour-module-type');
+    const progressEl = document.getElementById('tour-progress');
+    const modeBadge = document.getElementById('mode-badge');
+
+    if (this.moduleData && this.moduleData[moduleId]) {
+      const mod = this.moduleData[moduleId];
+      if (nameEl) nameEl.textContent = mod.moduleName || moduleId;
+      if (typeEl) typeEl.textContent = mod.moduleType || 'unknown';
+    } else {
+      const ud = this.modules3D[moduleId]?.userData;
+      if (nameEl) nameEl.textContent = ud?.moduleName || moduleId;
+      if (typeEl) typeEl.textContent = ud?.moduleType || 'unknown';
+    }
+    if (progressEl) progressEl.textContent = `${index + 1} / ${total}`;
+    if (modeBadge) modeBadge.textContent = `🎬 TOUR (${index + 1}/${total})`;
+  }
+
+  _updateSpeedIndicator() {
+    const fill = document.getElementById('speed-fill');
+    const label = document.getElementById('speed-label');
+    if (!fill || !label || !this.avatar) return;
+
+    const speed = this.avatar.currentSpeed;
+    const maxSpeed = this.avatar.moveSpeed * 1.8; // sprint speed
+    const pct = Math.min((speed / maxSpeed) * 100, 100);
+    fill.style.height = `${pct}%`;
+
+    if (speed < 1) {
+      label.textContent = 'IDLE';
+    } else if (this.avatar.keys.sprint) {
+      label.textContent = 'SPRINT';
+    } else {
+      label.textContent = 'MOVE';
     }
   }
 
@@ -1131,6 +1205,7 @@ export class SceneManager {
     // Update avatar or orbit controls
     if (this.controlMode === 'thirdPerson' && this.avatar) {
       this.avatar.update(delta, elapsed);
+      this._updateSpeedIndicator();
     } else {
       this.controls.update();
     }

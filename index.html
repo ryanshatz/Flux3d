@@ -52,6 +52,10 @@
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="5" r="3"/><circle cx="5" cy="19" r="3"/><circle cx="19" cy="19" r="3"/><line x1="12" y1="8" x2="5" y2="16"/><line x1="12" y1="8" x2="19" y2="16"/></svg>
           ANI
         </button>
+        <button id="btn-toggle-tour" class="toggle-btn" title="Auto-tour through call flow (T)">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+          Tour
+        </button>
       </div>
 
       <!-- Actions — Icon-only with tooltips -->
@@ -155,6 +159,46 @@
     <div id="onboarding-toast" class="onboarding-toast hidden">
       <span>Use <b>WASD</b> to move · Click modules to inspect · Press <b>?</b> for help</span>
       <button id="toast-dismiss" class="toast-dismiss">✕</button>
+    </div>
+
+    <!-- Camera Mode Badge (top-right) -->
+    <div id="mode-badge" class="mode-badge">🎮 3RD PERSON</div>
+
+    <!-- Speed Indicator -->
+    <div id="speed-bar" class="speed-bar">
+      <div id="speed-fill" class="speed-fill"></div>
+      <span id="speed-label" class="speed-label">IDLE</span>
+    </div>
+
+    <!-- Persistent Controls HUD (bottom-right, above minimap) -->
+    <div class="controls-hud">
+      <div class="hud-keys">
+        <div class="hud-row">
+          <span class="hud-key">W</span>
+        </div>
+        <div class="hud-row">
+          <span class="hud-key">A</span>
+          <span class="hud-key">S</span>
+          <span class="hud-key">D</span>
+        </div>
+      </div>
+      <div class="hud-hints">
+        <span><b>⇧</b> Sprint</span>
+        <span><b>⚲</b> Zoom</span>
+        <span><b>Tab</b> Cam</span>
+        <span><b>T</b> Tour</span>
+      </div>
+    </div>
+
+    <!-- Tour Info Card (bottom-center, shown during tour) -->
+    <div id="tour-card" class="tour-card hidden">
+      <div class="tour-card-header">
+        <span class="tour-badge">🎬 TOUR</span>
+        <span id="tour-progress" class="tour-progress">1 / 8</span>
+      </div>
+      <div id="tour-module-name" class="tour-module-name">Module Name</div>
+      <div id="tour-module-type" class="tour-module-type">module_type</div>
+      <div class="tour-hint">Press <b>T</b> to stop</div>
     </div>
 
     <!-- Hidden file inputs -->
