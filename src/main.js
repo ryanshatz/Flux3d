@@ -7,6 +7,7 @@ import { generateDemoHeatData } from './data/csvParser.js';
 import { parseCallLogCSV } from './data/csvParser.js';
 import { SceneManager } from './scene/SceneManager.js';
 import { InspectorPanel } from './ui/InspectorPanel.js';
+import { CallSimulator } from './simulation/CallSimulator.js';
 
 class Flux3D {
   constructor() {
@@ -173,15 +174,18 @@ class Flux3D {
       }
     });
 
-    // Toggle Tour
+    // Toggle Tour → opens simulation modal (or stops active tour)
     const btnTour = document.getElementById('btn-toggle-tour');
     btnTour.addEventListener('click', () => {
       if (this.sceneManager._tour?.active) {
         this.sceneManager.stopTour();
       } else {
-        this.sceneManager.startTour();
+        this._openSimModal();
       }
     });
+
+    // Simulation modal events
+    this._setupSimModal();
 
     // Reset Camera
     const btnReset = document.getElementById('btn-reset-camera');
@@ -349,13 +353,13 @@ class Flux3D {
         return;
       }
 
-      // T — Auto-tour through call flow
+      // T — Open simulation modal or stop active tour
       if (e.key.toLowerCase() === 't' && !e.ctrlKey && !e.metaKey) {
         if (document.activeElement?.tagName !== 'INPUT') {
           if (this.sceneManager._tour?.active) {
             this.sceneManager.stopTour();
           } else {
-            this.sceneManager.startTour();
+            this._openSimModal();
           }
         }
         return;
@@ -440,6 +444,160 @@ class Flux3D {
 
     // Auto-dismiss after 6s
     setTimeout(() => toast.classList.add('hidden'), 6000);
+  }
+
+  // ═══ Call Simulation Modal ═══
+
+  _setupSimModal() {
+    const modal = document.getElementById('sim-modal');
+    const backdrop = modal?.querySelector('.sim-modal-backdrop');
+    const cancelBtn = document.getElementById('sim-cancel');
+    const closeBtn = document.getElementById('sim-close');
+    const form = document.getElementById('sim-form');
+    const watchBtn = document.getElementById('sim-watch');
+
+    backdrop?.addEventListener('click', () => this._closeSimModal());
+    cancelBtn?.addEventListener('click', () => this._closeSimModal());
+    closeBtn?.addEventListener('click', () => this._closeSimModal());
+
+    form?.addEventListener('submit', (e) => {
+      e.preventDefault();
+      this._runSimulation();
+    });
+
+    watchBtn?.addEventListener('click', () => this._watchJourney());
+
+    // Escape key closes modal
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && !modal?.classList.contains('hidden')) {
+        this._closeSimModal();
+      }
+    });
+  }
+
+  _openSimModal() {
+    if (!this.parsedData) return;
+
+    const modal = document.getElementById('sim-modal');
+    const fieldsContainer = document.getElementById('sim-fields');
+    const form = document.getElementById('sim-form');
+    const result = document.getElementById('sim-result');
+
+    // Reset state
+    form.classList.remove('hidden');
+    result.classList.add('hidden');
+    fieldsContainer.innerHTML = '';
+
+    // Extract variables from the IVR script
+    const fields = CallSimulator.extractVariables(this.parsedData);
+
+    if (fields.length === 0) {
+      // No decision variables — just show a message and go straight to tour
+      fieldsContainer.innerHTML = `
+        <div class="sim-field-group">
+          <span class="sim-field-label">NO DECISION VARIABLES DETECTED</span>
+          <span class="sim-field-hint">This IVR has no branch conditions. The call follows a single path.</span>
+        </div>`;
+    } else {
+      // Generate input field for each variable
+      for (const field of fields) {
+        const group = document.createElement('div');
+        group.className = 'sim-field-group';
+        group.innerHTML = `
+          <label class="sim-field-label" for="sim-var-${field.name}">${field.label.toUpperCase()}</label>
+          <input
+            class="sim-field-input"
+            id="sim-var-${field.name}"
+            data-var="${field.name}"
+            type="${field.type}"
+            placeholder="${field.placeholder}"
+            autocomplete="off"
+          />
+          ${field.examples.length > 0 ? `<span class="sim-field-hint">Known values: ${field.examples.join(', ')}</span>` : ''}
+        `;
+        fieldsContainer.appendChild(group);
+      }
+    }
+
+    modal.classList.remove('hidden');
+
+    // Focus first input
+    const firstInput = fieldsContainer.querySelector('.sim-field-input');
+    if (firstInput) setTimeout(() => firstInput.focus(), 100);
+  }
+
+  _closeSimModal() {
+    const modal = document.getElementById('sim-modal');
+    if (modal) modal.classList.add('hidden');
+    this._lastSimResult = null;
+  }
+
+  _runSimulation() {
+    if (!this.parsedData) return;
+
+    // Collect variable values from form
+    const inputs = document.querySelectorAll('#sim-fields .sim-field-input');
+    const variables = {};
+    inputs.forEach(input => {
+      variables[input.dataset.var] = input.value;
+    });
+
+    // Run simulation
+    const result = CallSimulator.simulate(this.parsedData, variables);
+    this._lastSimResult = result;
+
+    // Get the phone number for display
+    const phoneInput = document.querySelector('#sim-fields input[type="tel"]');
+    this._lastSimPhone = phoneInput?.value || Object.values(variables)[0] || '';
+
+    // Show result panel, hide form
+    const form = document.getElementById('sim-form');
+    const resultPanel = document.getElementById('sim-result');
+    form.classList.add('hidden');
+    resultPanel.classList.remove('hidden');
+
+    // Render decision log
+    this._renderSimLog(result);
+  }
+
+  _renderSimLog(result) {
+    const logContainer = document.getElementById('sim-log');
+    logContainer.innerHTML = '';
+
+    const actionEmoji = {
+      'MATCHED':   '🔀',
+      'NO MATCH':  '✅',
+      'HANGUP':    '📴',
+      'TRANSFER':  '🎯',
+      'PASS':      '▶️'
+    };
+
+    result.log.forEach((entry, i) => {
+      const div = document.createElement('div');
+      div.className = 'sim-log-entry';
+      div.dataset.action = entry.action;
+      div.innerHTML = `
+        <span class="sim-log-step">${i + 1}</span>
+        <div class="sim-log-body">
+          <div class="sim-log-name">${actionEmoji[entry.action] || '•'} ${entry.moduleName}</div>
+          <div class="sim-log-detail">${entry.detail}</div>
+        </div>
+        <span class="sim-log-action">${entry.action}</span>
+      `;
+      logContainer.appendChild(div);
+    });
+  }
+
+  _watchJourney() {
+    if (!this._lastSimResult || this._lastSimResult.path.length === 0) return;
+
+    this._closeSimModal();
+
+    // Feed the simulation path to the tour system
+    this.sceneManager.startSimulationTour(
+      this._lastSimResult.path,
+      this._lastSimPhone
+    );
   }
 }
 

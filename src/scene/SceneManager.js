@@ -824,6 +824,64 @@ export class SceneManager {
 
   // ═══ Auto-Tour ═══
 
+  /**
+   * Start a simulation tour with a pre-computed path from CallSimulator.
+   * @param {string[]} path - Array of module IDs in order
+   * @param {string} phoneNumber - The phone number being simulated (for display)
+   */
+  startSimulationTour(path, phoneNumber) {
+    if (!path || path.length === 0) return;
+
+    // Filter path to only modules that exist in 3D
+    const validPath = path.filter(id => this.modules3D[id]);
+    if (validPath.length === 0) return;
+
+    // Switch to orbit mode for tour
+    if (this.controlMode === 'thirdPerson') {
+      this._preTourMode = 'thirdPerson';
+      this.controlMode = 'orbit';
+      if (this.avatar) {
+        this.avatar.avatarGroup.visible = false;
+        this.avatar.disable();
+      }
+      this.controls.enabled = true;
+    } else {
+      this._preTourMode = 'orbit';
+    }
+
+    this._tour.active = true;
+    this._tour.path = validPath;
+    this._tour.index = 0;
+    this._tour.timer = 0;
+    this._tour._transitioning = true;
+    this._tour._isSimulation = true;
+    this._tour._phoneNumber = phoneNumber || '';
+
+    // Update HUD — simulation-specific badge
+    const badge = document.getElementById('mode-badge');
+    if (badge) {
+      badge.textContent = `📞 SIMULATING (1/${validPath.length})`;
+      badge.classList.add('tour-active');
+    }
+
+    // Update tour card
+    const tourBadge = document.querySelector('.tour-badge');
+    if (tourBadge) tourBadge.textContent = `📞 ${phoneNumber || 'SIMULATING'}`;
+    this._updateTourCard(validPath[0], 0, validPath.length);
+    const tourCard = document.getElementById('tour-card');
+    if (tourCard) tourCard.classList.remove('hidden');
+    const tourBtn = document.getElementById('btn-toggle-tour');
+    if (tourBtn) tourBtn.classList.add('active');
+
+    // Fly to first module
+    const firstObj = this.modules3D[validPath[0]];
+    if (firstObj) {
+      this._flyToModule(firstObj.position);
+      this._highlightModule(validPath[0]);
+      this._tracePath(validPath[0]);
+    }
+  }
+
   startTour() {
     if (!this._currentParsedData) return;
     const { modules, edges } = this._currentParsedData;
@@ -894,12 +952,16 @@ export class SceneManager {
     this._tour.active = false;
     this._tour.path = [];
     this._tour.index = 0;
+    this._tour._isSimulation = false;
+    this._tour._phoneNumber = '';
 
-    // Hide tour card
+    // Hide tour card & reset badge text
     const tourCard = document.getElementById('tour-card');
     if (tourCard) tourCard.classList.add('hidden');
     const tourBtn = document.getElementById('btn-toggle-tour');
     if (tourBtn) tourBtn.classList.remove('active');
+    const tourBadge = document.querySelector('.tour-badge');
+    if (tourBadge) tourBadge.textContent = '🎬 TOUR';
 
     // Restore previous mode
     if (this._preTourMode === 'thirdPerson') {
@@ -993,7 +1055,11 @@ export class SceneManager {
       if (typeEl) typeEl.textContent = ud?.moduleType || 'unknown';
     }
     if (progressEl) progressEl.textContent = `${index + 1} / ${total}`;
-    if (modeBadge) modeBadge.textContent = `🎬 TOUR (${index + 1}/${total})`;
+    if (this._tour._isSimulation) {
+      if (modeBadge) modeBadge.textContent = `📞 SIMULATING (${index + 1}/${total})`;
+    } else {
+      if (modeBadge) modeBadge.textContent = `🎬 TOUR (${index + 1}/${total})`;
+    }
   }
 
   _updateSpeedIndicator() {

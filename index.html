@@ -201,6 +201,46 @@
       <div class="tour-hint">Press <b>T</b> to stop</div>
     </div>
 
+    <!-- Call Simulation Modal -->
+    <div id="sim-modal" class="sim-modal hidden">
+      <div class="sim-modal-backdrop"></div>
+      <div class="sim-modal-content">
+        <div class="sim-modal-header">
+          <span class="sim-modal-icon">📞</span>
+          <div>
+            <h2 class="sim-modal-title">Simulate a Call</h2>
+            <p class="sim-modal-subtitle">Enter the caller's details to trace their journey through the IVR</p>
+          </div>
+        </div>
+        <form id="sim-form" class="sim-form">
+          <div id="sim-fields" class="sim-fields">
+            <!-- Dynamic fields injected here -->
+          </div>
+          <div class="sim-actions">
+            <button type="button" id="sim-cancel" class="sim-btn sim-btn-cancel">Cancel</button>
+            <button type="submit" class="sim-btn sim-btn-submit">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+              Simulate Call
+            </button>
+          </div>
+        </form>
+        <div id="sim-result" class="sim-result hidden">
+          <div class="sim-result-header">
+            <span class="sim-result-icon">📋</span>
+            <span>Decision Log</span>
+          </div>
+          <div id="sim-log" class="sim-log"></div>
+          <div class="sim-actions">
+            <button type="button" id="sim-close" class="sim-btn sim-btn-cancel">Close</button>
+            <button type="button" id="sim-watch" class="sim-btn sim-btn-submit">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+              Watch Journey
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- Hidden file inputs -->
     <input type="file" id="file-input-ivr" accept=".five9ivr,.xml" hidden />
     <input type="file" id="file-input-csv" accept=".csv" hidden />
