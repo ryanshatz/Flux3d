@@ -1392,7 +1392,7 @@ html, body {
 
 .speed-bar {
   position: fixed;
-  bottom: 180px;
+  bottom: 280px;
   right: 22px;
   z-index: 90;
   width: 4px;
@@ -1437,7 +1437,7 @@ html, body {
 
 .controls-hud {
   position: fixed;
-  bottom: 200px;
+  bottom: 300px;
   right: var(--space-md);
   z-index: 90;
   display: flex;
