@@ -30,9 +30,9 @@ animated data cables, real-time analytics, and interactive module inspection.
 
 <div align="center">
 
-<img src="docs/screenshots/hero-overview.png" alt="Flux3D — Full 3D Scene Overview" width="100%" />
+<img src="docs/screenshots/hero_overview.png" alt="Flux3D — Full 3D Scene Overview" width="100%" />
 
-<sub><b>Full 3D Scene</b> — Navigate an immersive environment with glowing modules, animated data cables, floating particles, and a holographic avatar. The toolbar at the top provides one-click access to all features.</sub>
+<sub><b>Full 3D Scene</b> — Navigate an immersive environment with glowing modules, animated data cables, floating particles, and a holographic avatar. The compact toolbar, persistent controls HUD, camera mode badge, and mini-map keep you oriented at all times.</sub>
 
 </div>
 
@@ -41,17 +41,27 @@ animated data cables, real-time analytics, and interactive module inspection.
 <table>
 <tr>
 <td width="50%">
-<img src="docs/screenshots/inspector-panel.png" alt="Module Inspector Panel" width="100%" />
+<img src="docs/screenshots/tour_mode.png" alt="Auto-Tour Mode" width="100%" />
 <br />
-<div align="center"><sub><b>Module Inspector</b> — Click any module to reveal its identity, flow data, routing info, and TTS prompts in a glassmorphism side panel.</sub></div>
+<div align="center"><sub><b>Auto-Tour Mode</b> — Press T or click Tour in the toolbar. The camera flies module-by-module through the call flow, orbiting each one while displaying the module name, type, and progress counter in a floating card.</sub></div>
 </td>
 <td width="50%">
-<img src="docs/screenshots/module-closeup.png" alt="Module Close-up with Ground Rings" width="100%" />
+<img src="docs/screenshots/proximity_glow.png" alt="Proximity Glow & Footstep Dust" width="100%" />
 <br />
-<div align="center"><sub><b>Module Close-up</b> — Each module has a unique 3D geometry on a glowing platform. Animated pulse rings ripple outward on the ground.</sub></div>
+<div align="center"><sub><b>Proximity Glow</b> — Walk near any module and it lights up with an emissive boost. Footstep dust puffs trail behind the avatar. Cables near the avatar also brighten to show data flow activating around you.</sub></div>
 </td>
 </tr>
 </table>
+
+<br />
+
+<div align="center">
+
+<img src="docs/screenshots/zoom_closeup.png" alt="Over-the-Shoulder Zoom" width="80%" />
+
+<sub><b>Dynamic Zoom</b> — Scroll the mouse wheel to zoom in for an over-the-shoulder view, or zoom out for a top-down overview. Camera angle adjusts dynamically with smooth lerping.</sub>
+
+</div>
 
 <br />
 
@@ -63,17 +73,45 @@ animated data cables, real-time analytics, and interactive module inspection.
 
 ### 🎮 3rd-Person Avatar Navigation
 
-Control a holographic data-entity that walks around your IVR map at ground level. The avatar features articulated limbs with a detailed walk cycle, a glowing visor, and trail particles.
+Control a holographic data-entity that walks around your IVR map at ground level. The avatar features articulated limbs with a detailed walk cycle, a glowing visor, antenna, and trail particles.
 
 | Feature | Description |
 |---|---|
 | **WASD Movement** | Camera-relative controls — W always means "forward from where you're looking" |
 | **Smooth Acceleration** | Speed lerps smoothly — no jarring start/stop |
-| **Sprint** | Hold `Shift` to move 1.8× faster with subtle camera shake |
-| **Zoom** | Scroll wheel adjusts camera distance and angle in real-time |
+| **Sprint + FOV Kick** | Hold `Shift` to move 1.8× faster. FOV widens 60°→72° for a visceral speed feel |
+| **Dynamic Zoom** | Scroll wheel adjusts distance + angle: over-the-shoulder close, top-down far |
+| **Footstep Dust** | Cyan particles puff at the avatar's feet on each step cycle |
 | **Free Camera** | Press `Tab` to toggle orbit/free-look mode |
-| **Click-to-Walk** | Click any module to auto-navigate the avatar there |
-| **Double-Click Fly-to** | Double-click any module to instantly teleport nearby |
+| **Click-to-Walk** | Click any module to smoothly auto-walk there |
+| **Double-Click Fly-to** | Double-click any module to teleport or fly the camera |
+| **Speed Indicator** | Vertical bar showing IDLE / MOVE / SPRINT with gradient fill |
+
+<br />
+
+### 🎬 Auto-Tour Mode
+
+Press **T** or click the **Tour** button in the toolbar to start an automated camera tour that follows the call flow from entry to exit.
+
+- **BFS-ordered path** — Follows the actual call-flow graph from IncomingCall through downstream modules
+- **Smooth fly-between** — Camera transitions smoothly with cubic ease-out between modules
+- **Orbit dwell** — Gently orbits each module for 2.5 seconds before advancing
+- **Tour info card** — Floating card shows module name, type, and progress (e.g., "3 / 6")
+- **Mode badge** — Top-right pill updates to `🎬 TOUR (3/6)` during tour
+- **Path tracing** — Each visited module's call path is highlighted with traced cables
+- **Press T to stop** — Instantly exits tour and restores your previous camera mode
+
+<br />
+
+### 🌟 World Reactivity
+
+The environment responds to the avatar's position to create a living, interactive feel:
+
+| Feature | Description |
+|---|---|
+| **Module Proximity Glow** | Modules within 25 units brighten with emissive boost + 1.02× scale |
+| **Cable Proximity Glow** | Cables near the avatar light up with distance-based falloff |
+| **"START HERE" Beacon** | Entry module has a glowing beacon to guide new users |
 
 <br />
 
@@ -81,28 +119,28 @@ Control a holographic data-entity that walks around your IVR map at ground level
 
 Every IVR module type has a unique, identifiable 3D shape sitting on a glowing platform base. All modules feature idle floating animation and a breathing emissive glow.
 
-| Module Type | 3D Shape | Color | Visual Effects |
-|---|---|---|---|
-| 📞 **IncomingCall** | Torus portal + glowing sphere | Cyan | Pulse rings, "START HERE" label |
-| 🎯 **SkillTransfer** | Industrial cylinder with flanges | Orange | Heat-glow on high volume |
-| 🔀 **Case / IfElse** | Diamond octahedron + spinning wireframe | Yellow | Continuous rotation |
-| 📴 **Hangup** | Compact box with X cross | Red | Red emissive warning glow |
-| 🔊 **Play** | Speaker cone with wave rings | Purple | Audio wave animation |
-| ⚙️ **SetVariable** | Gear torus + center sphere | Steel Blue | Subtle spin |
-| 🛡️ **BlockedCaller** | Shield with X cross | Pink | Cluster expansion |
-| 🗄️ **CRM / Database** | Stacked disks with connector | Green | Data pulse |
+| Module Type | 3D Shape | Color |
+|---|---|---|
+| 📞 **IncomingCall** | Torus portal + glowing sphere | Cyan |
+| 🎯 **SkillTransfer** | Industrial cylinder with flanges | Orange |
+| 🔀 **Case / IfElse** | Diamond octahedron + spinning wireframe | Yellow |
+| 📴 **Hangup** | Compact box with X cross | Red |
+| 🔊 **Play** | Speaker cone with wave rings | Purple |
+| ⚙️ **SetVariable** | Gear torus + center sphere | Steel Blue |
+| 🛡️ **BlockedCaller** | Shield with X cross | Pink |
+| 🗄️ **CRM / Database** | Stacked disks with connector | Green |
 
 <br />
 
 ### 🔌 Animated Cable Routing
 
-Cables use Manhattan routing (orthogonal 90° turns) with smooth CatmullRom curves. Every cable is alive with animation:
+Cables use Manhattan routing (orthogonal 90° turns) with smooth CatmullRom curves:
 
-- **🔵 Flowing Data Particles** — Glowing particles travel along each cable showing real-time data flow direction
-- **⚡ Electric Pulse Waves** — Periodic brightness spikes travel the cable length, simulating data transmission
-- **💫 Breathing Glow** — Cable emissive intensity oscillates with a subtle, organic pulse
-- **🎨 Color-Coded Types** — Default (blue), Branch (orange), Hangup (red), Success (green), Error (coral)
-- **📊 Volume Scaling** — Cable thickness, particle density, and glow intensity scale with call volume data
+- **🔵 Flowing Data Particles** — Glowing particles travel along each cable showing data flow direction
+- **⚡ Electric Pulse Waves** — Periodic brightness spikes travel the cable length
+- **💫 Breathing Glow** — Cable emissive intensity oscillates subtly
+- **🎨 Color-Coded** — Default (blue), Branch (orange), Hangup (red), Success (green), Error (coral)
+- **📊 Volume Scaling** — Thickness, particle density, and glow intensity scale with call volume
 
 <br />
 
@@ -111,38 +149,50 @@ Cables use Manhattan routing (orthogonal 90° turns) with smooth CatmullRom curv
 | Feature | Description |
 |---|---|
 | **Heat Map Mode** | Toggle to visualize call volume — thicker cables and brighter modules indicate more traffic |
-| **Path Tracing** | Click any module to trace the full upstream + downstream path using BFS traversal. Unrelated cables dim to 8% opacity |
+| **Path Tracing** | Click any module to trace the full upstream + downstream path. Unrelated cables dim to 8% |
 | **Dead-End Detection** | Automatically logs unreachable or terminal modules to the console |
 | **Live Stats Bar** | Real-time counts of modules, connections, blocked ANIs, and skill transfers |
-| **Module Inspector** | Detailed side panel with module identity, flow metadata, TTS text, decision branches, and routing info |
-| **ANI Expansion** | Expand blocked caller ANI node clusters around case modules for detailed analysis |
-| **Mini-Map** | Top-down 2D overview of the entire IVR graph in the bottom-right corner |
+| **Module Inspector** | Detailed side panel with identity, flow metadata, TTS text, and routing info |
+| **ANI Expansion** | Expand blocked caller ANI node clusters around case modules |
+| **Mini-Map** | 2D top-down overview with player position tracking |
+
+<br />
+
+### 🖥️ Professional HUD
+
+The interface is designed to stay out of the way while providing constant awareness:
+
+| Element | Location | Description |
+|---|---|---|
+| **Compact Toolbar** | Top center | Logo, filename, toggle group (Labels/Heat/ANI/Tour), icon-only actions |
+| **Mode Badge** | Top right | Shows `🎮 3RD PERSON` / `🎥 ORBIT` / `🎬 TOUR (3/6)` |
+| **Info Bar** | Bottom left | Inline stats + color-coded legend dots. Fades to 70% idle |
+| **Controls HUD** | Right side | WASD keycap grid + Sprint/Zoom/Cam/Tour hints. Visible at 35% idle |
+| **Speed Bar** | Right side | Vertical fill indicator showing movement speed |
+| **Mini-Map** | Bottom right | Top-down 2D overview with player position |
+| **Onboarding Toast** | Bottom center | First-visit hint: "Use WASD to move · Click modules to inspect" |
 
 <br />
 
 ### 🌌 Immersive Atmosphere
 
-The environment is designed to feel alive and futuristic:
-
 - **Gradient Skybox** — Deep navy → charcoal gradient for cinematic depth
 - **Hex Circuit Ground** — Dark hex pattern with cyan circuit traces
-- **1,200+ Glow Particles** — Additive-blended dust motes with size variation drifting upward
-- **50 Firefly Accents** — Large, bright particles with pulsing glow that drift lazily through the scene
-- **Animated Pulse Rings** — 3 concentric rings on the ground ripple outward in phase
-- **Bloom Post-Processing** — UnrealBloomPass for that signature emissive glow on all modules
-- **Per-Module Floating** — Every module gently bobs on a unique sine wave (desynchronized)
-- **Breathing Emissives** — All module glow intensities oscillate subtly, creating a living feel
+- **600 Glow Particles** — Additive-blended dust motes drifting upward
+- **20 Firefly Accents** — Large, bright particles with pulsing glow
+- **Animated Pulse Rings** — 3 concentric rings ripple outward on the ground
+- **Bloom Post-Processing** — UnrealBloomPass for signature emissive glow
+- **Per-Module Floating** — Gentle sine-wave bob (desynchronized per module)
 
 <br />
 
 ### 🔍 Search & Interaction
 
-- **`Ctrl+F` Search** — Real-time module search by name or type with instant results
-- **Hover Tooltip** — Module name + type with emoji indicator, follows cursor with smooth fade-in
-- **Smooth Hover Effects** — Scale and glow lerp smoothly on hover (no instant snapping)
-- **Path Trace on Click** — Click a module to highlight its full call path chain
-- **Click Empty Space** — Clear the current selection and path trace
-- **📷 Screenshot Export** — Branded PNG snapshots with Flux3D watermark and timestamp
+- **`Ctrl+F` Search** — Real-time module search by name or type
+- **Hover Tooltip** — Module name + type with emoji indicator
+- **Smooth Hover Effects** — Scale and glow lerp smoothly on hover
+- **Path Trace on Click** — Click a module to highlight its full call path
+- **📷 Screenshot Export** — Branded PNG snapshots with watermark and timestamp
 
 <br />
 
@@ -177,16 +227,16 @@ Open **http://localhost:5173/Flux3D/** in your browser. The sample IVR script lo
 
 ### Loading Your Own IVR Script
 
-1. Click **"Load IVR"** in the toolbar
+1. Click the **upload icon** in the toolbar
 2. Select any `.five9ivr` XML file exported from Five9 VCC
 3. The 3D scene builds automatically with spring-animated module entrances
 
 ### Adding Heat Map Data
 
-1. Click **"Heat Map CSV"** in the toolbar
+1. Click the **CSV upload icon** in the toolbar
 2. Upload a CSV call log with module path and call count columns
 3. Cable thickness, particle density, and module glow scale with call volume
-4. Toggle the **"Heat Map"** button to switch between normal and heat-mapped views
+4. Toggle the **Heat** button to switch between normal and heat-mapped views
 
 <br />
 
@@ -202,8 +252,9 @@ Open **http://localhost:5173/Flux3D/** in your browser. The sample IVR script lo
 |---|---|
 | `W` `A` `S` `D` | Move forward / left / backward / right |
 | `↑` `←` `↓` `→` | Alternative movement keys |
-| `Shift` | Sprint (1.8× speed, camera shake) |
+| `Shift` | Sprint (1.8× speed, FOV kick, camera shake) |
 | `Tab` | Toggle 3rd-person ↔ free camera |
+| `T` | Start / stop auto-tour |
 | `Ctrl+F` | Open module search |
 | `Escape` | Close overlays and panels |
 | `F11` | Toggle fullscreen |
@@ -217,7 +268,7 @@ Open **http://localhost:5173/Flux3D/** in your browser. The sample IVR script lo
 | **Click Module** | Select → auto-walk → trace path → open inspector |
 | **Double-Click Module** | Teleport avatar (3rd person) or fly camera (orbit) |
 | **Click Empty Space** | Clear selection and path trace |
-| **Scroll Wheel** | Zoom camera in/out |
+| **Scroll Wheel** | Dynamic zoom with camera angle adjustment |
 | **Right-Drag** | Pan camera (free camera mode) |
 
 <br />
@@ -231,11 +282,11 @@ Open **http://localhost:5173/Flux3D/** in your browser. The sample IVR script lo
 | Layer | Technology | Purpose |
 |---|---|---|
 | **3D Engine** | [Three.js](https://threejs.org/) r172 | Scene graph, materials, lighting, post-processing |
-| **Post-Processing** | UnrealBloomPass | Emissive glow on all modules and cables |
-| **Build Tool** | [Vite](https://vitejs.dev/) 6 | Lightning-fast HMR, ES module bundling |
-| **UI Framework** | Vanilla CSS | Custom design system with glassmorphism and CSS variables |
-| **Labels** | CSS2DRenderer | Always-facing module labels that scale with distance |
-| **Particles** | Custom glow sprites | Canvas-generated radial gradient textures with additive blending |
+| **Post-Processing** | UnrealBloomPass | Emissive glow on modules and cables |
+| **Build Tool** | [Vite](https://vitejs.dev/) 6 | Fast HMR, ES module bundling |
+| **UI Framework** | Vanilla CSS | Custom design system with glassmorphism |
+| **Labels** | CSS2DRenderer | Always-facing module labels |
+| **Particles** | Custom glow sprites | Canvas-generated radial gradient textures |
 | **Hosting** | GitHub Pages | Static deployment from `gh-pages` branch |
 
 <br />
@@ -249,42 +300,43 @@ Open **http://localhost:5173/Flux3D/** in your browser. The sample IVR script lo
 ```
 Flux3D/
 │
-├── 📄 index.html                   # Main HTML (toolbar, inspector, search, overlays)
+├── 📄 index.html                   # Main HTML (toolbar, HUD, inspector, overlays)
 ├── ⚙️ vite.config.js                # Vite config (GitHub Pages base path)
 ├── 📦 package.json                  # Dependencies and scripts
-├── 📋 INBOUND OPEN.five9ivr         # Sample IVR script (auto-loaded on startup)
+├── 📋 INBOUND OPEN.five9ivr         # Sample IVR script (auto-loaded)
 │
 ├── 📂 src/
-│   ├── 🚀 main.js                   # App entry point — file handling, UI wiring
+│   ├── 🚀 main.js                   # App entry — file handling, UI wiring, shortcuts
 │   │
 │   ├── 📂 styles/
-│   │   └── 🎨 main.css              # Full design system (1,200+ lines)
-│   │                                  # Dark theme, glassmorphism, animations, tooltips
+│   │   └── 🎨 main.css              # Full design system (1,500+ lines)
+│   │                                  # Toolbar, HUD, tour card, mode badge, etc.
 │   │
 │   ├── 📂 parser/
 │   │   ├── 📖 five9Parser.js        # Five9 XML → module graph + edge list
 │   │   └── 🔊 ttsDecoder.js         # TTS prompt text decoder
 │   │
 │   ├── 📂 data/
-│   │   └── 📊 csvParser.js          # Call log CSV → heat map + demo data generator
+│   │   └── 📊 csvParser.js          # Call log CSV → heat map data
 │   │
 │   ├── 📂 scene/
-│   │   ├── 🎬 SceneManager.js       # Three.js orchestrator (1,100+ lines)
-│   │   │                              # Scene, lights, camera, bloom, interactions,
-│   │   │                              # hover system, path tracing, animations
-│   │   ├── 🏗️ ModuleFactory.js       # 3D geometry builder (10+ unique module shapes)
-│   │   ├── 🔌 CableRenderer.js      # Manhattan cable routing + flow particles + pulses
-│   │   ├── 🤖 AvatarController.js   # 3rd-person character + walk cycle + camera follow
-│   │   └── ✨ ParticleSystem.js      # Dual-layer atmosphere (dust motes + fireflies)
+│   │   ├── 🎬 SceneManager.js       # Three.js orchestrator (1,500+ lines)
+│   │   │                              # Proximity glow, auto-tour, path tracing,
+│   │   │                              # animations, hover system
+│   │   ├── 🏗️ ModuleFactory.js       # 3D geometry builder (10+ module shapes)
+│   │   ├── 🔌 CableRenderer.js      # Manhattan cables + flow particles + pulses
+│   │   ├── 🤖 AvatarController.js   # 3rd-person character + FOV kick + dust puffs
+│   │   │                              # + dynamic zoom + auto-walk
+│   │   └── ✨ ParticleSystem.js      # Dual-layer atmosphere (dust + fireflies)
 │   │
 │   └── 📂 ui/
-│       ├── 🔍 InspectorPanel.js      # Module detail sidebar (glassmorphism panel)
+│       ├── 🔍 InspectorPanel.js      # Module detail sidebar
 │       └── 🗺️ MiniMap.js             # 2D top-down overview minimap
 │
 ├── 📂 docs/
 │   └── 📂 screenshots/              # README screenshots
 │
-└── 📂 public/                        # Static assets copied to dist/
+└── 📂 public/                        # Static assets
 ```
 
 <br />
