@@ -39,7 +39,7 @@ export class ParticleSystem {
   }
 
   _createDustLayer() {
-    const count = 1200;
+    const count = 600;
     const spread = 350;
 
     const geometry = new THREE.BufferGeometry();
@@ -82,7 +82,7 @@ export class ParticleSystem {
       map: this._glowTexture,
       vertexColors: true,
       transparent: true,
-      opacity: 0.35,
+      opacity: 0.22,
       blending: THREE.AdditiveBlending,
       depthWrite: false,
       sizeAttenuation: true
@@ -94,7 +94,7 @@ export class ParticleSystem {
   }
 
   _createFireflyLayer() {
-    const count = 50;
+    const count = 20;
     const spread = 250;
 
     const geometry = new THREE.BufferGeometry();
@@ -126,11 +126,11 @@ export class ParticleSystem {
     geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
 
     const material = new THREE.PointsMaterial({
-      size: 2.5,
+      size: 1.8,
       map: this._glowTexture,
       vertexColors: true,
       transparent: true,
-      opacity: 0.5,
+      opacity: 0.3,
       blending: THREE.AdditiveBlending,
       depthWrite: false,
       sizeAttenuation: true
@@ -158,7 +158,7 @@ export class ParticleSystem {
     this.dustParticles.geometry.attributes.position.needsUpdate = true;
 
     // Subtle global opacity pulse for dust
-    this.dustParticles.material.opacity = 0.3 + Math.sin(elapsed * 0.5) * 0.05;
+    this.dustParticles.material.opacity = 0.18 + Math.sin(elapsed * 0.5) * 0.04;
 
     // Update fireflies — slow drift + pulsing opacity
     const ffPos = this.fireflyParticles.geometry.attributes.position.array;
@@ -179,7 +179,7 @@ export class ParticleSystem {
     this.fireflyParticles.geometry.attributes.position.needsUpdate = true;
 
     // Firefly pulsing glow
-    this.fireflyParticles.material.opacity = 0.25 + Math.sin(elapsed * 0.8) * 0.2;
-    this.fireflyParticles.material.size = 2.0 + Math.sin(elapsed * 0.6) * 0.8;
+    this.fireflyParticles.material.opacity = 0.15 + Math.sin(elapsed * 0.8) * 0.12;
+    this.fireflyParticles.material.size = 1.5 + Math.sin(elapsed * 0.6) * 0.4;
   }
 }

@@ -48,6 +48,9 @@ class Flux3D {
       const overlay = document.getElementById('loading-overlay');
       overlay.classList.add('fade-out');
       setTimeout(() => overlay.remove(), 800);
+
+      // Show onboarding toast on first visit
+      this._showOnboarding();
     }, 1500);
   }
 
@@ -103,14 +106,13 @@ class Flux3D {
     if (!this.parsedData) return;
 
     const { stats } = this.parsedData;
-    document.getElementById('stat-modules').textContent = stats.totalModules;
-    document.getElementById('stat-connections').textContent = stats.totalConnections;
-    document.getElementById('stat-blocked').textContent = stats.blockedANIs;
-    document.getElementById('stat-skills').textContent = stats.skills;
+    document.getElementById('stat-modules').textContent = `${stats.totalModules} modules`;
+    document.getElementById('stat-connections').textContent = `${stats.totalConnections} connections`;
+    document.getElementById('stat-blocked').textContent = `${stats.blockedANIs} ANIs`;
+    document.getElementById('stat-skills').textContent = `${stats.skills} skills`;
 
-    const statsBar = document.getElementById('stats-bar');
-    statsBar.classList.remove('hidden');
-    statsBar.classList.add('visible');
+    const statsInline = document.getElementById('stats-inline');
+    statsInline.classList.remove('hidden');
   }
 
   _setupToolbar() {
@@ -396,6 +398,26 @@ class Flux3D {
       };
       reader.readAsText(file);
     });
+  }
+
+  _showOnboarding() {
+    // Only show once per browser
+    if (localStorage.getItem('flux3d-onboarded')) return;
+
+    const toast = document.getElementById('onboarding-toast');
+    if (!toast) return;
+
+    toast.classList.remove('hidden');
+    localStorage.setItem('flux3d-onboarded', '1');
+
+    // Dismiss button
+    const dismissBtn = document.getElementById('toast-dismiss');
+    if (dismissBtn) {
+      dismissBtn.addEventListener('click', () => toast.classList.add('hidden'));
+    }
+
+    // Auto-dismiss after 6s
+    setTimeout(() => toast.classList.add('hidden'), 6000);
   }
 }
 

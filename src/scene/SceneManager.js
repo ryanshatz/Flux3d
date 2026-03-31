@@ -110,7 +110,7 @@ export class SceneManager {
 
     this.bloomPass = new UnrealBloomPass(
       new THREE.Vector2(this.container.clientWidth, this.container.clientHeight),
-      0.6,
+      0.45,
       0.4,
       0.85
     );
@@ -385,7 +385,7 @@ export class SceneManager {
         baseY: height,
         floatOffset: Math.random() * Math.PI * 2,
         floatSpeed: 0.8 + Math.random() * 0.6,
-        floatAmp: 0.15 + Math.random() * 0.15,
+        floatAmp: 0.06 + Math.random() * 0.06,
         moduleName: mod.moduleName
       };
 
@@ -1020,7 +1020,7 @@ export class SceneManager {
       obj.traverse(child => {
         if (child.isMesh && child.userData.isMainMesh) {
           const baseGlow = child.userData.baseEmissive || 0.3;
-          const breathe = Math.sin(elapsed * 1.2 + (ud.floatOffset || 0)) * 0.08;
+          const breathe = Math.sin(elapsed * 1.2 + (ud.floatOffset || 0)) * 0.03;
           child.material.emissiveIntensity = baseGlow + breathe;
         }
         // Spin wireframe overlays
@@ -1052,8 +1052,8 @@ export class SceneManager {
     this._pulseRings.forEach(ring => {
       const phase = ring.userData.pulsePhase;
       const t = (elapsed * 0.4 + phase) % (Math.PI * 2);
-      ring.material.opacity = Math.max(0, Math.sin(t) * 0.06);
-      const scaleF = 1 + Math.sin(t) * 0.15;
+      ring.material.opacity = Math.max(0, Math.sin(t) * 0.03);
+      const scaleF = 1 + Math.sin(t) * 0.08;
       ring.scale.set(scaleF, scaleF, 1);
     });
 
@@ -1145,15 +1145,15 @@ export class SceneManager {
 
       // Adjust bloom based on heat state
       if (this.heatMapActive) {
-        this.bloomPass.strength = 0.9;
+        this.bloomPass.strength = 0.6;
       } else {
-        this.bloomPass.strength = 0.5;
+        this.bloomPass.strength = 0.4;
       }
     } else {
       // During transition, pulse the bloom
       const t = this._heatTransition.progress;
       const pulse = Math.sin(t * Math.PI);
-      this.bloomPass.strength = 0.7 + pulse * 0.8;
+      this.bloomPass.strength = 0.5 + pulse * 0.4;
     }
   }
 

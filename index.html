@@ -28,48 +28,48 @@
       </div>
     </div>
 
-    <!-- Top Toolbar -->
+    <!-- Top Toolbar — Compact 3-section layout -->
     <header id="toolbar" class="toolbar">
-      <div class="toolbar-left">
-        <div class="logo">
-          <span class="logo-icon">◆</span>
-          <span class="logo-text">FLUX<span class="accent">3D</span></span>
-        </div>
-        <div class="toolbar-divider"></div>
+      <!-- Identity -->
+      <div class="toolbar-identity">
+        <span class="logo-icon">◆</span>
+        <span class="logo-text">FLUX<span class="accent">3D</span></span>
+        <span class="toolbar-sep"></span>
         <span id="script-name" class="script-name">No script loaded</span>
       </div>
-      <div class="toolbar-center">
-        <button id="btn-upload-ivr" class="toolbar-btn primary" title="Upload .five9ivr file">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-          <span>Load IVR</span>
+
+      <!-- View Toggles — Segmented pill group -->
+      <div class="toggle-group">
+        <button id="btn-toggle-labels" class="toggle-btn active" title="Toggle module labels">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 7h10v10"/><path d="M7 17L17 7"/></svg>
+          Labels
         </button>
-        <button id="btn-upload-csv" class="toolbar-btn" title="Upload Call Log CSV">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-          <span>Heat Map CSV</span>
+        <button id="btn-toggle-heat" class="toggle-btn active" title="Toggle heat-map overlay">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"/><circle cx="12" cy="12" r="4"/></svg>
+          Heat
         </button>
-        <div class="toolbar-divider"></div>
-        <button id="btn-toggle-labels" class="toolbar-btn active" title="Toggle labels">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 7h10v10"/><path d="M7 17L17 7"/></svg>
-          <span>Labels</span>
-        </button>
-        <button id="btn-toggle-heat" class="toolbar-btn active" title="Toggle heat-map">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"/><circle cx="12" cy="12" r="4"/></svg>
-          <span>Heat Map</span>
-        </button>
-        <button id="btn-toggle-ani" class="toolbar-btn" title="Expand blocked ANIs into individual nodes">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="5" r="3"/><circle cx="5" cy="19" r="3"/><circle cx="19" cy="19" r="3"/><line x1="12" y1="8" x2="5" y2="16"/><line x1="12" y1="8" x2="19" y2="16"/></svg>
-          <span>ANI Expand</span>
-        </button>
-        <button id="btn-reset-camera" class="toolbar-btn" title="Reset camera">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 4v6h6"/><path d="M23 20v-6h-6"/><path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15"/></svg>
-          <span>Reset</span>
+        <button id="btn-toggle-ani" class="toggle-btn" title="Expand blocked ANI nodes">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="5" r="3"/><circle cx="5" cy="19" r="3"/><circle cx="19" cy="19" r="3"/><line x1="12" y1="8" x2="5" y2="16"/><line x1="12" y1="8" x2="19" y2="16"/></svg>
+          ANI
         </button>
       </div>
-      <div class="toolbar-right">
-        <button id="btn-fullscreen" class="toolbar-btn" title="Fullscreen (F11)">
+
+      <!-- Actions — Icon-only with tooltips -->
+      <div class="toolbar-actions">
+        <button id="btn-upload-ivr" class="action-btn" title="Load .five9ivr file">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        </button>
+        <button id="btn-upload-csv" class="action-btn" title="Load heat-map CSV">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/></svg>
+        </button>
+        <span class="action-sep"></span>
+        <button id="btn-reset-camera" class="action-btn" title="Reset camera">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 4v6h6"/><path d="M23 20v-6h-6"/><path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15"/></svg>
+        </button>
+        <button id="btn-fullscreen" class="action-btn" title="Fullscreen (F11)">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>
         </button>
-        <button id="btn-screenshot" class="toolbar-btn" title="Screenshot">
+        <button id="btn-screenshot" class="action-btn" title="Save screenshot">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
         </button>
       </div>
@@ -105,23 +105,33 @@
           <div class="shortcut-row"><span class="key-badge">⇧ Shift</span><span class="shortcut-desc">Sprint</span></div>
           <div class="shortcut-row"><span class="key-badge">Tab</span><span class="shortcut-desc">Toggle Free Camera</span></div>
           <div class="shortcut-row"><span class="key-badge">Scroll</span><span class="shortcut-desc">Zoom in/out</span></div>
+          <div class="shortcut-row"><span class="key-badge">Click</span><span class="shortcut-desc">Select + trace path</span></div>
+          <div class="shortcut-row"><span class="key-badge">Dbl-Click</span><span class="shortcut-desc">Fly to module</span></div>
           <div class="shortcut-row"><span class="key-badge">Ctrl+F</span><span class="shortcut-desc">Search modules</span></div>
           <div class="shortcut-row"><span class="key-badge">F11</span><span class="shortcut-desc">Fullscreen</span></div>
           <div class="shortcut-row"><span class="key-badge">?</span><span class="shortcut-desc">This panel</span></div>
-          <div class="shortcut-row"><span class="key-badge">Click</span><span class="shortcut-desc">Select + walk to module</span></div>
-          <div class="shortcut-row"><span class="key-badge">Right-drag</span><span class="shortcut-desc">Pan camera (Free Cam)</span></div>
         </div>
       </div>
     </div>
 
-    <!-- Connection Legend -->
-    <div id="connection-legend" class="connection-legend">
-      <div class="legend-title">CONNECTIONS</div>
-      <div class="legend-item"><span class="legend-dot" style="background:#2266bb"></span>Default</div>
-      <div class="legend-item"><span class="legend-dot" style="background:#cc8800"></span>Branch</div>
-      <div class="legend-item"><span class="legend-dot" style="background:#dd2244"></span>Hangup</div>
-      <div class="legend-item"><span class="legend-dot" style="background:#00aa55"></span>Success</div>
-      <div class="legend-item"><span class="legend-dot" style="background:#dd5533"></span>Error</div>
+    <!-- Consolidated Info Bar (bottom-left) — legend + stats in one -->
+    <div id="info-bar" class="info-bar">
+      <div id="stats-inline" class="stats-inline hidden">
+        <span id="stat-modules" class="stat-chip">0 modules</span>
+        <span class="stat-dot">·</span>
+        <span id="stat-connections" class="stat-chip">0 connections</span>
+        <span class="stat-dot">·</span>
+        <span id="stat-blocked" class="stat-chip">0 ANIs</span>
+        <span class="stat-dot">·</span>
+        <span id="stat-skills" class="stat-chip">0 skills</span>
+      </div>
+      <div class="legend-inline">
+        <span class="legend-dot-item"><span class="ldot" style="background:#2266bb"></span>Default</span>
+        <span class="legend-dot-item"><span class="ldot" style="background:#cc8800"></span>Branch</span>
+        <span class="legend-dot-item"><span class="ldot" style="background:#dd2244"></span>Hangup</span>
+        <span class="legend-dot-item"><span class="ldot" style="background:#00aa55"></span>Success</span>
+        <span class="legend-dot-item"><span class="ldot" style="background:#dd5533"></span>Error</span>
+      </div>
     </div>
 
     <!-- Inspector Panel -->
@@ -141,48 +151,10 @@
       </div>
     </aside>
 
-    <!-- Stats Bar -->
-    <div id="stats-bar" class="stats-bar hidden">
-      <div class="stat-item">
-        <span class="stat-label">Modules</span>
-        <span id="stat-modules" class="stat-value">0</span>
-      </div>
-      <div class="stat-item">
-        <span class="stat-label">Connections</span>
-        <span id="stat-connections" class="stat-value">0</span>
-      </div>
-      <div class="stat-item">
-        <span class="stat-label">Blocked ANIs</span>
-        <span id="stat-blocked" class="stat-value">0</span>
-      </div>
-      <div class="stat-item">
-        <span class="stat-label">Skills</span>
-        <span id="stat-skills" class="stat-value">0</span>
-      </div>
-    </div>
-
-    <!-- Controls Hint -->
-    <div class="controls-hint">
-      <div class="controls-hint-item">
-        <span class="key-badge">W</span><span class="key-badge">A</span><span class="key-badge">S</span><span class="key-badge">D</span>
-        Move
-      </div>
-      <div class="controls-hint-item">
-        <span class="key-badge">⇧</span>
-        Sprint
-      </div>
-      <div class="controls-hint-item">
-        <span class="key-badge">Tab</span>
-        Free Cam
-      </div>
-      <div class="controls-hint-item">
-        <span class="key-badge">Scroll</span>
-        Zoom
-      </div>
-      <div class="controls-hint-item">
-        <span class="key-badge">?</span>
-        Help
-      </div>
+    <!-- Onboarding Toast (first visit only) -->
+    <div id="onboarding-toast" class="onboarding-toast hidden">
+      <span>Use <b>WASD</b> to move · Click modules to inspect · Press <b>?</b> for help</span>
+      <button id="toast-dismiss" class="toast-dismiss">✕</button>
     </div>
 
     <!-- Hidden file inputs -->
