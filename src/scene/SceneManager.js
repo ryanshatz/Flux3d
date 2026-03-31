@@ -55,6 +55,19 @@ export class SceneManager {
     // Ground pulse rings
     this._pulseRings = [];
 
+    // Proximity range for module/cable glow
+    this._proximityRange = 25;
+
+    // Auto-tour state
+    this._tour = {
+      active: false,
+      path: [],       // ordered module IDs
+      index: 0,
+      timer: 0,
+      dwellTime: 2.5, // seconds per module
+      transitTime: 1.5
+    };
+
     this._init();
   }
 
@@ -806,6 +819,128 @@ export class SceneManager {
     animateCamera();
   }
 
+  // ═══ Auto-Tour ═══
+
+  startTour() {
+    if (!this._currentParsedData) return;
+    const { modules, edges } = this._currentParsedData;
+
+    // Build BFS path from entry module (incomingCall)
+    const entry = modules.find(m => m.moduleType === 'incomingCall');
+    if (!entry) return;
+
+    // BFS traversal
+    const visited = new Set();
+    const queue = [entry.moduleId];
+    const path = [];
+    const downstream = {};
+    edges.forEach(e => {
+      if (!downstream[e.from]) downstream[e.from] = [];
+      downstream[e.from].push(e.to);
+    });
+
+    while (queue.length > 0) {
+      const id = queue.shift();
+      if (visited.has(id)) continue;
+      visited.add(id);
+      if (this.modules3D[id]) path.push(id);
+      const next = downstream[id] || [];
+      next.forEach(n => { if (!visited.has(n)) queue.push(n); });
+    }
+
+    if (path.length === 0) return;
+
+    // Switch to orbit mode for tour
+    if (this.controlMode === 'thirdPerson') {
+      this._preTourMode = 'thirdPerson';
+      this.controlMode = 'orbit';
+      if (this.avatar) {
+        this.avatar.avatarGroup.visible = false;
+        this.avatar.disable();
+      }
+      this.controls.enabled = true;
+    } else {
+      this._preTourMode = 'orbit';
+    }
+
+    this._tour.active = true;
+    this._tour.path = path;
+    this._tour.index = 0;
+    this._tour.timer = 0;
+    this._tour._transitioning = true;
+
+    // Fly to first module
+    const firstObj = this.modules3D[path[0]];
+    if (firstObj) {
+      this._flyToModule(firstObj.position);
+    }
+  }
+
+  stopTour() {
+    this._tour.active = false;
+    this._tour.path = [];
+    this._tour.index = 0;
+
+    // Restore previous mode
+    if (this._preTourMode === 'thirdPerson') {
+      this.controlMode = 'thirdPerson';
+      if (this.avatar) {
+        this.avatar.avatarGroup.visible = true;
+        this.avatar.enable();
+      }
+      this.controls.enabled = false;
+    }
+    this._preTourMode = null;
+  }
+
+  _updateTour(delta) {
+    if (!this._tour.active) return;
+
+    this._tour.timer += delta;
+
+    // After dwell + transit time, move to next module
+    const totalTime = this._tour.dwellTime + this._tour.transitTime;
+    if (this._tour.timer >= totalTime) {
+      this._tour.timer = 0;
+      this._tour.index++;
+
+      if (this._tour.index >= this._tour.path.length) {
+        this.stopTour();
+        return;
+      }
+
+      // Highlight current module
+      const moduleId = this._tour.path[this._tour.index];
+      this._highlightModule(moduleId);
+      this._tracePath(moduleId);
+
+      // Fly to next module
+      const obj = this.modules3D[moduleId];
+      if (obj) {
+        this._flyToModule(obj.position);
+      }
+    }
+
+    // Gentle orbit during dwell phase
+    if (this._tour.timer > this._tour.transitTime) {
+      const orbitSpeed = 0.2;
+      const orbitAngle = this._tour.timer * orbitSpeed;
+      const moduleId = this._tour.path[this._tour.index];
+      const obj = this.modules3D[moduleId];
+      if (obj && this.controls) {
+        const radius = 30;
+        const camX = obj.position.x + Math.cos(orbitAngle) * radius;
+        const camZ = obj.position.z + Math.sin(orbitAngle) * radius;
+        this.camera.position.lerp(
+          new THREE.Vector3(camX, obj.position.y + 20, camZ),
+          Math.min(2 * delta, 1)
+        );
+        this.controls.target.lerp(obj.position, Math.min(3 * delta, 1));
+        this.controls.update();
+      }
+    }
+  }
+
   _tracePath(moduleId) {
     this._tracedPath.clear();
     if (!this._currentParsedData) return;
@@ -1035,13 +1170,28 @@ export class SceneManager {
       if (target && current) {
         current.scale += (target.scale - current.scale) * Math.min(lerpSpeed, 1);
         current.glow += (target.glow - current.glow) * Math.min(lerpSpeed, 1);
-        obj.scale.setScalar(current.scale);
 
-        // Apply hover glow boost
-        if (current.glow > 0.01) {
+        // Module proximity glow — boost when avatar is nearby
+        let proximityBoost = 0;
+        let proximityScale = 0;
+        if (this.avatar && this.controlMode === 'thirdPerson') {
+          const dx = obj.position.x - this.avatar.position.x;
+          const dz = obj.position.z - this.avatar.position.z;
+          const dist = Math.sqrt(dx * dx + dz * dz);
+          if (dist < this._proximityRange) {
+            const falloff = 1 - (dist / this._proximityRange);
+            proximityBoost = falloff * 0.15;
+            proximityScale = falloff * 0.02;
+          }
+        }
+
+        obj.scale.setScalar(current.scale + proximityScale);
+
+        // Apply hover glow boost + proximity boost
+        if (current.glow > 0.01 || proximityBoost > 0) {
           obj.traverse(child => {
             if (child.isMesh && child.userData.isMainMesh) {
-              child.material.emissiveIntensity += current.glow * 0.5;
+              child.material.emissiveIntensity += current.glow * 0.5 + proximityBoost;
             }
           });
         }
@@ -1057,9 +1207,24 @@ export class SceneManager {
       ring.scale.set(scaleF, scaleF, 1);
     });
 
-    // Animate cables
+    // Animate cables (with proximity glow)
+    const avatarPos = this.avatar ? this.avatar.position : null;
     this.cables.forEach(cable => {
       if (cable.userData.update) cable.userData.update(elapsed);
+      // Cable proximity glow
+      if (avatarPos && cable.userData.startPos && cable.userData.endPos) {
+        const cs = cable.userData.startPos;
+        const ce = cable.userData.endPos;
+        const dStart = Math.sqrt((cs.x - avatarPos.x) ** 2 + (cs.z - avatarPos.z) ** 2);
+        const dEnd = Math.sqrt((ce.x - avatarPos.x) ** 2 + (ce.z - avatarPos.z) ** 2);
+        const closest = Math.min(dStart, dEnd);
+        if (closest < this._proximityRange && cable.material) {
+          const falloff = 1 - (closest / this._proximityRange);
+          cable.material.emissiveIntensity = (cable.userData.baseEmissive || 0.3) + falloff * 0.4;
+        } else if (cable.material) {
+          cable.material.emissiveIntensity = cable.userData.baseEmissive || 0.3;
+        }
+      }
     });
 
     // ANI cables
@@ -1078,6 +1243,9 @@ export class SceneManager {
       const playerPos = this.avatar ? this.avatar.position : this.camera.position;
       this.miniMap.updatePlayerPosition(playerPos.x, playerPos.z);
       this.miniMap.render();
+
+    // Auto-tour update
+    this._updateTour(delta, elapsed);
     }
 
     // Render

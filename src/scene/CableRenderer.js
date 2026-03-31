@@ -100,6 +100,9 @@ export class CableRenderer {
     const baseOpacity = tubeMat.opacity;
 
     // Store update function for animation
+    group.userData.startPos = fromPos.clone();
+    group.userData.endPos = toPos.clone();
+    group.userData.baseEmissive = baseEmissiveIntensity;
     group.userData.update = (elapsed) => {
       // Cable breathing pulse
       const breathe = Math.sin(elapsed * (1.5 + volume * 2)) * 0.12;

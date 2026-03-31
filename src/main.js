@@ -338,6 +338,18 @@ class Flux3D {
         this._toggleFullscreen();
         return;
       }
+
+      // T — Auto-tour through call flow
+      if (e.key.toLowerCase() === 't' && !e.ctrlKey && !e.metaKey) {
+        if (document.activeElement?.tagName !== 'INPUT') {
+          if (this.sceneManager._tour?.active) {
+            this.sceneManager.stopTour();
+          } else {
+            this.sceneManager.startTour();
+          }
+        }
+        return;
+      }
     });
   }
 

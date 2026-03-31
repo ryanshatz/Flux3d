@@ -37,6 +37,20 @@ export class AvatarController {
     // Keys
     this.keys = { forward: false, backward: false, left: false, right: false, sprint: false };
 
+    // Sprint FOV
+    this._baseFov = 60;
+    this._sprintFov = 72;
+    this._currentFov = 60;
+
+    // Zoom state
+    this._zoomLevel = 1.0; // 0 = closest, 1 = default, 2 = farthest
+    this._zoomMin = 0.35;
+    this._zoomMax = 2.2;
+
+    // Footstep dust system
+    this._lastStepSign = 1;
+    this._dustPuffs = [];
+
     // Build
     this.avatarGroup = new THREE.Group();
     this._buildAvatar();
@@ -302,6 +316,13 @@ export class AvatarController {
     };
     window.addEventListener('keydown', this._onKeyDown);
     window.addEventListener('keyup', this._onKeyUp);
+
+    // Mouse wheel for zoom
+    this._onWheel = (e) => {
+      this._zoomLevel += e.deltaY * 0.001;
+      this._zoomLevel = Math.max(this._zoomMin, Math.min(this._zoomMax, this._zoomLevel));
+    };
+    window.addEventListener('wheel', this._onWheel, { passive: true });
   }
 
   enable() {
@@ -325,7 +346,7 @@ export class AvatarController {
     if (this._navTarget) {
       const toTarget = new THREE.Vector3(this._navTarget.x - this.position.x, 0, this._navTarget.z - this.position.z);
       const dist = toTarget.length();
-      if (dist < 3) {
+      if (dist < 8) {
         this._navTarget = null; // Arrived
       } else {
         toTarget.normalize();
@@ -382,11 +403,13 @@ export class AvatarController {
     if (this.isMoving) {
       this.walkTime += delta * (this.keys.sprint ? 14 : 10);
       this._animateWalk(this.walkTime);
+      this._checkFootstep();
     } else {
       this.walkTime = 0;
       this._animateIdle(elapsed);
     }
 
+    this._updateDustPuffs(delta);
     this._updateTrail(delta, elapsed);
     this._updateCamera(delta, elapsed);
   }
@@ -500,6 +523,18 @@ export class AvatarController {
       this.camera.position.y += (Math.random() - 0.5) * shakeIntensity * 0.5;
     }
 
+    // Sprint FOV kick — smoothly widen/narrow
+    const targetFov = (this.isMoving && this.keys.sprint) ? this._sprintFov : this._baseFov;
+    this._currentFov += (targetFov - this._currentFov) * Math.min(4 * delta, 1);
+    this.camera.fov = this._currentFov;
+
+    // Dynamic zoom — adjust camera offset based on zoom level
+    const zoomY = 8 + this._zoomLevel * 8;   // 8..25.6
+    const zoomZ = 12 + this._zoomLevel * 16;  // 12..47.2
+    this.cameraOffset.y += (zoomY - this.cameraOffset.y) * Math.min(5 * delta, 1);
+    this.cameraOffset.z += (zoomZ - this.cameraOffset.z) * Math.min(5 * delta, 1);
+    this.camera.updateProjectionMatrix();
+
     // Smooth look-target (lerp instead of snap)
     const desiredLookTarget = this.position.clone().add(
       new THREE.Vector3(-Math.sin(this.rotation), 3, -Math.cos(this.rotation))
@@ -519,6 +554,80 @@ export class AvatarController {
     this._navTarget = new THREE.Vector3(x, 0, z);
   }
 
+  // ── Footstep Dust Puffs ──
+
+  _checkFootstep() {
+    // Detect zero-crossing of walkTime sine = step contact
+    const stepSin = Math.sin(this.walkTime);
+    const sign = stepSin >= 0 ? 1 : -1;
+    if (sign !== this._lastStepSign) {
+      this._lastStepSign = sign;
+      this._spawnDustPuff();
+    }
+  }
+
+  _spawnDustPuff() {
+    const count = 5;
+    const puff = {
+      particles: [],
+      age: 0,
+      maxAge: 0.6
+    };
+
+    for (let i = 0; i < count; i++) {
+      const geo = new THREE.PlaneGeometry(0.3, 0.3);
+      const mat = new THREE.MeshBasicMaterial({
+        color: 0x44aacc,
+        transparent: true,
+        opacity: 0.4,
+        side: THREE.DoubleSide,
+        depthWrite: false
+      });
+      const mesh = new THREE.Mesh(geo, mat);
+      mesh.position.set(
+        this.position.x + (Math.random() - 0.5) * 1.2,
+        0.1 + Math.random() * 0.3,
+        this.position.z + (Math.random() - 0.5) * 1.2
+      );
+      mesh.rotation.x = -Math.PI / 2;
+      mesh.userData.vx = (Math.random() - 0.5) * 2;
+      mesh.userData.vz = (Math.random() - 0.5) * 2;
+      mesh.userData.vy = 0.5 + Math.random() * 1;
+      this.scene.add(mesh);
+      puff.particles.push(mesh);
+    }
+
+    this._dustPuffs.push(puff);
+  }
+
+  _updateDustPuffs(delta) {
+    for (let i = this._dustPuffs.length - 1; i >= 0; i--) {
+      const puff = this._dustPuffs[i];
+      puff.age += delta;
+      const t = puff.age / puff.maxAge;
+
+      if (t >= 1) {
+        // Remove
+        puff.particles.forEach(p => {
+          this.scene.remove(p);
+          p.geometry.dispose();
+          p.material.dispose();
+        });
+        this._dustPuffs.splice(i, 1);
+        continue;
+      }
+
+      puff.particles.forEach(p => {
+        p.position.x += p.userData.vx * delta;
+        p.position.y += p.userData.vy * delta;
+        p.position.z += p.userData.vz * delta;
+        p.material.opacity = 0.4 * (1 - t);
+        const s = 1 + t * 2;
+        p.scale.set(s, s, s);
+      });
+    }
+  }
+
   disable() {
     this.enabled = false;
   }
@@ -535,6 +644,16 @@ export class AvatarController {
   dispose() {
     window.removeEventListener('keydown', this._onKeyDown);
     window.removeEventListener('keyup', this._onKeyUp);
+    if (this._onWheel) window.removeEventListener('wheel', this._onWheel);
+    // Clean up dust puffs
+    this._dustPuffs.forEach(puff => {
+      puff.particles.forEach(p => {
+        this.scene.remove(p);
+        p.geometry.dispose();
+        p.material.dispose();
+      });
+    });
+    this._dustPuffs = [];
     this.avatarGroup.traverse(child => {
       if (child.geometry) child.geometry.dispose();
       if (child.material) {
